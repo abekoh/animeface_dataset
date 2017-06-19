@@ -1,5 +1,6 @@
 *.jpg
 *.png
 *.mp4
+*.ts
 *.pyc
 /lbpcascade_animeface.xml
