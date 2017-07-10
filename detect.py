@@ -85,5 +85,5 @@ class Detector:
 
 
 if __name__ == '__main__':
-    detector = Detector('src')
+    detector = Detector(src_dir_path='../../Videos/animes2', dst_dir_path='../../animefaces')
     detector.detect()
