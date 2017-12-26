@@ -1,5 +1,6 @@
 import cv2
 import os
+from tqdm import tqdm
 
 
 class Video:
@@ -41,10 +42,11 @@ class Detector:
                 filepath = os.path.join(dirpath, filename)
                 if os.path.splitext(filepath)[1] in self.video_exts:
                     self.video_paths.append(filepath)
+        self.video_paths.sort()
 
     def detect(self):
-        for video_path in self.video_paths:
-            print('detecting faces in {}'.format(video_path))
+        for video_path in tqdm(self.video_paths):
+            # print('detecting faces in {}'.format(video_path))
             dst_video_dir_path = self._get_dst_video_dir_path(video_path)
             video = Video(video_path)
             while 1:
@@ -53,18 +55,15 @@ class Detector:
                     break
                 face_imgs = self._get_faces_one_frame(img)
                 if len(face_imgs) > 0:
-                    print('detect {} faces at {} frame'.format(len(face_imgs), frame_i))
+                    # print('detect {} faces at {} frame'.format(len(face_imgs), frame_i))
                     for face_i, face_img in enumerate(face_imgs):
-                        resized_face_img = self._resize_img(face_img, self.min_size)
-                        cv2.imwrite(os.path.join(dst_video_dir_path, '{}_{}.png'.format(frame_i, face_i)), resized_face_img)
+                        resized_face_img = self._resize_img(face_img, self.resized_size)
+                        cv2.imwrite(os.path.join(dst_video_dir_path, '{:05d}_{:02d}.png'.format(frame_i, face_i)), resized_face_img)
 
     def _get_dst_video_dir_path(self, video_path):
-        if os.path.split(video_path)[0] == self.src_dir_path:
-            dst_video_dir_path = self.dst_dir_path
-        else:
-            dirname = video_path.split('/')[-2]
-            filename = video_path.split('/')[-1].split('.')[0]
-            dst_video_dir_path = os.path.join(self.dst_dir_path, dirname, filename)
+        dirname = video_path.split('/')[-2]
+        filename = video_path.split('/')[-1].split('.')[0]
+        dst_video_dir_path = os.path.join(self.dst_dir_path, dirname, filename)
         if not os.path.exists(dst_video_dir_path):
             os.makedirs(dst_video_dir_path)
         return dst_video_dir_path
@@ -81,9 +80,9 @@ class Detector:
         return face_imgs
 
     def _resize_img(self, img, size):
-        return cv2.resize(img, size)
+        return cv2.resize(img, size, interpolation=cv2.INTER_AREA)
 
 
 if __name__ == '__main__':
-    detector = Detector(src_dir_path='../../Videos/animes2', dst_dir_path='../../animefaces')
+    detector = Detector(src_dir_path='../../Videos/ラブライブ！サンシャイン！！', dst_dir_path='../../animefaces', resized_size=(64, 64))
     detector.detect()
